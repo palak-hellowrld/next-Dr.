@@ -1,7 +1,8 @@
-from sqlalchemy import create_engine, String, Text, select, ForeignKey
+from sqlalchemy import create_engine, String, Text, select, ForeignKey, func
 from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, Mapped, relationship
 from datetime import date as dt_date
 from dotenv import load_dotenv
+import random
 import os
 
 load_dotenv()
@@ -45,7 +46,7 @@ with Session(engine) as session:
     session.query(Term).delete()
     session.query(Category).delete()
     session.commit()
-    
+
     categoryDict = {"Cardiovascular": Category(specialty="Cardiovascular"), 
                     "Digestive": Category(specialty="Digestive"),
                     "Liver": Category(specialty="Liver"),
@@ -171,5 +172,13 @@ with Session(engine) as session:
         session.add(termIter)
     
     session.commit()
-    
-    
+
+def getTodaysTerm(session):
+    todays_puzzle = session.query(DailyTerm).filter(DailyTerm.date == dt_date.today()).first()
+    if todays_puzzle==None:
+        todaysNewPuzzle = session.query(Term).order_by(func.random()).first()
+        session.add(DailyTerm(date=dt_date.today(), term_id = todaysNewPuzzle.id))
+        session.commit()
+        return (todaysNewPuzzle)
+    else:
+        return (session.query(Term).filter(Term.id==todays_puzzle.term_id).first())
