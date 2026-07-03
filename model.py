@@ -6,7 +6,6 @@ import os
 
 load_dotenv()
 db_password = os.getenv("DB_PASSWORD")
-print("Password loaded as:", db_password)
 engine = create_engine(f"postgresql+psycopg2://postgres:{db_password}@localhost:5432/next_dr")
 
 try:
@@ -42,6 +41,11 @@ class DailyTerm(Base):
 Base.metadata.create_all(engine)
 
 with Session(engine) as session:
+    session.query(DailyTerm).delete()
+    session.query(Term).delete()
+    session.query(Category).delete()
+    session.commit()
+    
     categoryDict = {"Cardiovascular": Category(specialty="Cardiovascular"), 
                     "Digestive": Category(specialty="Digestive"),
                     "Liver": Category(specialty="Liver"),
