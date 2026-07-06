@@ -1,0 +1,75 @@
+<!--
+index.html
+
+Main game template for Next Dr.?
+- Renders {{ clues }} progressively based on clueNumber.
+- Renders {{ allTerms }} as dropdown options for guessing.
+- Renders a result modal (correct/wrong) using {{ result }} and
+  {{ correctAnswer }} -- dismissible via close button or click-outside.
+- Includes the animated walking heart mascot.
+-->
+
+<html>
+    <head>
+        <title> Next Dr.? </title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        {% if result == 'correct' %}
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="modal-box modal-correct">
+                    <span class="modal-close" onclick="closeModal()">&times;</span>
+                    <p>Correct! Today's word was <br><span class="modal-term">{{ correctAnswer }}</span>.</p>
+                </div>
+            </div>
+        {% elif result == 'wrong' %}
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="modal-box modal-wrong">
+                    <span class="modal-close" onclick="closeModal()">&times;</span>
+                    <p>Almost! Today's word was <br><span class="modal-term">{{ correctAnswer }}</span>.<br> Better luck tomorrow!</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <h1> NEXT DR.?</h1>
+
+        <div class="clues">
+            {% for clue in clues %}
+                <div class="clue-box clue-{{ loop.index }}">{{ clue }}</div>
+            {% endfor %}
+        </div>
+
+        <form method="POST" class="guess-form">
+            <select name="guess" class="guess-dropdown">
+                {% for term in allTerms %}
+                    <option value="{{ term.term_name }}">{{ term.term_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="guess-button">Guess!</button>
+        </form>
+    
+        <script>
+            function closeModal() {
+                const overlay = document.getElementById("modalOverlay");
+                if (overlay){
+                    overlay.style.display = "none";
+                }
+            }
+
+            document.addEventListener("click", function(event) {
+                const overlay = document.getElementById("modalOverlay");
+                if (overlay && event.target === overlay) {
+                    overlay.style.display = "none";
+                }
+            });
+        </script>
+
+        <div class="heartWalker">
+            <div class="leg legLeft"></div>
+            <div class="leg legRight"></div>
+            <img src="{{ url_for('static', filename='animated-heart.png') }}" class="heartImg" alt="heart mascot">
+        </div>
+
+    </body>
+</html>
