@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title> Next Dr.? </title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <h1> NEXT DR.? </h1>
+
+
+        {% for clue in clues %}
+            <div class="clue-box clue-{{ loop.index }}">{{ clue }}</div>
+        {% endfor %}
+
+        <form method="POST">
+            <select name="guess">
+                {% for term in allTerms %}
+                    <option value="{{ term.term_name }}">{{ term.term_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Guess!</button>
+        </form>
+
+    </body>
+</html>
