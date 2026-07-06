@@ -1,8 +1,27 @@
-from sqlalchemy import create_engine, String, Text, select, ForeignKey, func
-from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, Mapped, relationship
-from datetime import date as dt_date
+"""
+model.py
+
+Defines the SQLAlchemy 2.0 (typed Mapped/mapped_column style) models for
+the Next Dr.? game.
+
+Models:
+- Category: stores each medical specialty (e.g. Cardiovascular, Digestive, etc.)
+- Term: stores each medical term and its 4 progressive clues (clue1-clue4).
+- DailyTerm: stores the term of the day for each date (date is unique).
+- Visitor: stores each visitor's unique ID, first_seen date, last_seen date, and visitCount.
+
+engine: SQLAlchemy engine connecting to Postgres via .env config.
+getTodaysTerm(session): returns the term of the day (deterministic by date).
+"""
+
+
+from sqlalchemy import create_engine, String, Text, select, ForeignKey, func, Column, Integer, DateTime
+from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, Mapped
+from datetime import time, date as dt_date, datetime
 from dotenv import load_dotenv
 import random
+import uuid
+
 import os
 
 load_dotenv()
@@ -38,6 +57,13 @@ class DailyTerm(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[dt_date] = mapped_column()
     term_id: Mapped[int] = mapped_column(ForeignKey("term.id"))
+
+class Visitor(Base):
+    __tablename__ = "visitors"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    first_seen: Mapped[dt_date] = mapped_column(DateTime, default=lambda: datetime.now())
+    last_seen: Mapped[dt_date] = mapped_column(DateTime, default=datetime.now())
+    visitCount: Mapped[int] = mapped_column(Integer, default=1)
 
 Base.metadata.create_all(engine)
 
