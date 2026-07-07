@@ -43,41 +43,54 @@ def index():
 
         visitor = session.query(model.Visitor).filter_by(id=visitorId).first()
 
-        if not visitor:
-            visitor = model.Visitor(id=visitorId, visitCount=1)
-            session.add(visitor)
-        else:
-            visitor.visitCount += 1
-            visitor.last_seen = datetime.now()
+        if request.method == "GET":
+            if not visitor:
+                visitor = model.Visitor(id=visitorId, visitCount=1)
+                session.add(visitor)
+            else:
+                visitor.visitCount += 1
+                visitor.last_seen = datetime.now()
 
-        session.commit()
+            session.commit()
 
         today = dt_date.today()
         storedDate = flaskSession.get("clueDate")
         todaysTerm =  model.getTodaysTerm(session)
         allTerms= session.query(model.Term).all()
+        gameOver= flaskSession.get("gameOver", False)
 
         if storedDate != str(today):
             clueNumber = 1
             flaskSession["clueNumber"] = 1
             flaskSession["clueDate"] = str(today)
+            gameOver = False
+            flaskSession["gameOver"] = False
         else:
             clueNumber = flaskSession.get("clueNumber", 1)
 
         cluesToShow = [getattr(todaysTerm, f"clue{n}") for n in range(1, clueNumber + 1)]
         result=None
 
-        if request.method == "POST":
-            userGuess=request.form.get("guess")
-            if userGuess==todaysTerm.term_name:
-                result="correct"
-            else:
-                if clueNumber<4:
-                    clueNumber+=1
-                    flaskSession["clueNumber"]=clueNumber
-                    cluesToShow = [getattr(todaysTerm, f"clue{n}") for n in range(1, clueNumber + 1)]
+        if gameOver == False:
+            if request.method == "POST":
+                userGuess=request.form.get("guess")
+                if userGuess==todaysTerm.term_name:
+                    result="correct"
+                    gameOver=True
+                    flaskSession["gameOver"]=True
+                    flaskSession["result"]="correct"
                 else:
-                    result="wrong"
+                    if clueNumber<4:
+                        clueNumber+=1
+                        flaskSession["clueNumber"]=clueNumber
+                        cluesToShow = [getattr(todaysTerm, f"clue{n}") for n in range(1, clueNumber + 1)]
+                    else:
+                        result="wrong"
+                        gameOver=True
+                        flaskSession["gameOver"]=True
+                        flaskSession["result"]="wrong"
+        else:
+            result = flaskSession.get("result", None)
         
         response = make_response(render_template(
             "index.html",
