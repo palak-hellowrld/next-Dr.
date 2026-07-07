@@ -26,7 +26,6 @@ import uuid
 import os
 
 load_dotenv()
-db_password = os.getenv("DB_PASSWORD")
 NEON_URL = os.getenv("NEON_URL")
 engine = create_engine(NEON_URL)
 
@@ -64,7 +63,7 @@ class Visitor(Base):
     __tablename__ = "visitors"
     id: Mapped[str] = mapped_column(String, primary_key=True)
     first_seen: Mapped[dt_date] = mapped_column(DateTime, default=lambda: datetime.now())
-    last_seen: Mapped[dt_date] = mapped_column(DateTime, default=datetime.now())
+    last_seen: Mapped[dt_date] = mapped_column(DateTime, default=lambda: datetime.now())
     visitCount: Mapped[int] = mapped_column(Integer, default=1)
 
 Base.metadata.create_all(engine)
