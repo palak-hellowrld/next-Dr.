@@ -8,7 +8,8 @@ Models:
 - Category: stores each medical specialty (e.g. Cardiovascular, Digestive, etc.)
 - Term: stores each medical term and its 4 progressive clues (clue1-clue4).
 - DailyTerm: stores the term of the day for each date (date is unique).
-- Visitor: stores each visitor's unique ID, first_seen date, last_seen date, and visitCount.
+- Visitor: stores each visitor's unique ID, first_seen date, last_seen date, and 
+  visitCount.
 
 engine: SQLAlchemy engine connecting to Postgres via .env config.
 getTodaysTerm(session): returns the term of the day (deterministic by date).
@@ -26,7 +27,8 @@ import os
 
 load_dotenv()
 db_password = os.getenv("DB_PASSWORD")
-engine = create_engine(f"postgresql+psycopg2://postgres:{db_password}@localhost:5432/next_dr")
+NEON_URL = os.getenv("NEON_URL")
+engine = create_engine(NEON_URL)
 
 try:
     with engine.connect() as conn:
